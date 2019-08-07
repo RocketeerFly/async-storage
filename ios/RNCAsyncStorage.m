@@ -20,6 +20,7 @@ static NSString *const RCTStorageDirectory = @"RCTAsyncLocalStorage_V1";
 static NSString *const RCTOldStorageDirectory = @"RNCAsyncLocalStorage_V1";
 static NSString *const RCTManifestFileName = @"manifest.json";
 static const NSUInteger RCTInlineValueThreshold = 1024;
+NSString *AppGroupName;
 
 #pragma mark - Static helper functions
 
@@ -94,11 +95,19 @@ static NSString *RCTCreateStorageDirectoryPath_deprecated(NSString *storageDir) 
 }
 
 static NSString *RCTCreateStorageDirectoryPath(NSString *storageDir) {
-  // We should use the "Application Support/[bundleID]" folder for persistent data storage that's hidden from users
-  NSString *storageDirectoryPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES).firstObject;
-  storageDirectoryPath = [storageDirectoryPath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]]; // Per Apple's docs, all app content in Application Support must be within a subdirectory of the app's bundle identifier
-  storageDirectoryPath = [storageDirectoryPath stringByAppendingPathComponent:storageDir];
-  return storageDirectoryPath;
+    NSString *storageDirectoryPath;
+    if (!AppGroupName) {
+        // We should use the "Application Support/[bundleID]" folder for persistent data storage that's hidden from users
+        storageDirectoryPath = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES).firstObject;
+        storageDirectoryPath = [storageDirectoryPath stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]]; // Per Apple's docs, all app content in Application Support must be within a subdirectory of the app's bundle identifier
+        storageDirectoryPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+    } else {
+        NSURL * pathUrl = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: AppGroupName];
+        storageDirectoryPath =  pathUrl.path;
+    }
+    storageDirectoryPath = [storageDirectoryPath stringByAppendingPathComponent:storageDir];
+    NSLog(@"PATH storageDirectoryPath %@", storageDirectoryPath);
+    return storageDirectoryPath;
 }
 
 static NSString *RCTGetStorageDirectory()
@@ -312,7 +321,22 @@ static void RCTStorageDirectoryMigrationCheck(NSString *fromStorageDirectory, NS
   // Then migrate what's in "Documents/.../RCTAsyncLocalStorage_V1" to "Application Support/[bundleID]/RCTAsyncLocalStorage_V1"
   RCTStorageDirectoryMigrationCheck(RCTCreateStorageDirectoryPath_deprecated(RCTStorageDirectory), RCTCreateStorageDirectoryPath(RCTStorageDirectory), NO);
 
+  self = [self initWithGroup:(NSString *) nil];
   return self;
+}
+
+- (instancetype)initWithGroup:(NSString *)group {
+
+    if (!self) {
+      self = [super init];
+    } else {
+        if (group) {
+            AppGroupName = group;
+        }
+    }
+    
+    RCTStorageDirectoryMigrationCheck();
+    return self;
 }
 
 RCT_EXPORT_MODULE()
