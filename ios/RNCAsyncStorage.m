@@ -265,6 +265,7 @@ static void RCTStorageDirectoryMigrate(NSString *oldDirectoryPath, NSString *new
  */
 static void RCTStorageDirectoryMigrationCheck(NSString *fromStorageDirectory, NSString *toStorageDirectory, BOOL shouldCleanupOldDirectoryAndOverwriteNewDirectory)
 {
+    NSLog("RCTStorageDirectoryMigrationCheck");
   NSError *error;
   BOOL isDir;
   NSFileManager *fileManager = [NSFileManager defaultManager];
