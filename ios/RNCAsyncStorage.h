@@ -40,6 +40,6 @@
 // Add multiple key value pairs to the cache.
 - (void)multiSet:(NSArray<NSArray<NSString *> *> *)kvPairs callback:(RCTResponseSenderBlock)callback;
 
-- (instancetype)initWithGroup:(NSString *)group;
++ (void)setGroupAppContainer:(NSString*)group;
 
 @end

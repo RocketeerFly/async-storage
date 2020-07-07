@@ -315,29 +315,17 @@ static void RCTStorageDirectoryMigrationCheck(NSString *fromStorageDirectory, NS
   if (!(self = [super init])) {
     return nil;
   }
-
+    NSLog(@"RNCAsyncStorage init with group %@", AppGroupName);
   // First migrate our deprecated path "Documents/.../RNCAsyncLocalStorage_V1" to "Documents/.../RCTAsyncLocalStorage_V1"
   RCTStorageDirectoryMigrationCheck(RCTCreateStorageDirectoryPath_deprecated(RCTOldStorageDirectory), RCTCreateStorageDirectoryPath_deprecated(RCTStorageDirectory), YES);
   
   // Then migrate what's in "Documents/.../RCTAsyncLocalStorage_V1" to "Application Support/[bundleID]/RCTAsyncLocalStorage_V1"
   RCTStorageDirectoryMigrationCheck(RCTCreateStorageDirectoryPath_deprecated(RCTStorageDirectory), RCTCreateStorageDirectoryPath(RCTStorageDirectory), NO);
-
-  self = [self initWithGroup:(NSString *) nil];
   return self;
 }
 
-- (instancetype)initWithGroup:(NSString *)group {
-
-    if (!self) {
-      self = [super init];
-    } else {
-        if (group) {
-            AppGroupName = group;
-        }
-    }
-    
-    RCTStorageDirectoryMigrationCheck();
-    return self;
++(void)setGroupAppContainer:(NSString *)group {
+    AppGroupName = group;
 }
 
 RCT_EXPORT_MODULE()
